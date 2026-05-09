@@ -935,5 +935,49 @@ video::-webkit-media-controls{display:none!important}
     font-size:11px !important;
   }
 }
+.video-sound-btn{
+  position:absolute;
+  top:84px;
+  right:16px;
+  width:58px;
+  height:58px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(8,8,12,.72);
+  backdrop-filter:blur(20px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:40;
+  font-size:22px;
+  color:white;
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+}
 
+.video-sound-btn:active{
+  transform:scale(.96);
+}
+
+.portrait-info{
+  padding:20px!important;
+}
+
+.portrait-info h3{
+  font-size:38px!important;
+  line-height:.88!important;
+  letter-spacing:-.06em!important;
+  margin:10px 0 10px!important;
+  max-width:90%;
+}
+
+.portrait-info strong{
+  font-size:20px!important;
+  display:block;
+  margin-bottom:16px!important;
+}
+
+.portrait-info div{
+  font-size:15px!important;
+  opacity:.95;
+}
 }
