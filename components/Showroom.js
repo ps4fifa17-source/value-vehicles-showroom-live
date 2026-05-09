@@ -38,7 +38,6 @@ function Ask({ car, question, setQuestion, innerRef }) {
   return (
     <section className="panel" ref={innerRef}>
       <h2>Ask</h2>
-
       <textarea
         className="question-input"
         value={question}
@@ -74,8 +73,8 @@ export default function Showroom({ car }) {
     const seen = new Set();
 
     const inspects = (car.inspectVideos || []).filter((clip) => {
-      const label = (clip.label || "").trim().toLowerCase();
-      const video = clip.video || "";
+      const label = (clip?.label || "").trim().toLowerCase();
+      const video = clip?.video || "";
 
       if (!video) return false;
       if (label === "walkaround") return false;
@@ -89,7 +88,7 @@ export default function Showroom({ car }) {
     return [
       {
         label: "Walkaround",
-        icon: "car",
+        icon: "walkaround",
         video: car.walkaroundVideo,
         preview: car.walkaroundVideo,
       },
@@ -104,10 +103,11 @@ export default function Showroom({ car }) {
   }, [car.walkaroundVideo]);
 
   const isWalkaround = activeLabel === "Walkaround";
+  const activeSoundChannel = cinema ? "cinema-walkaround" : "normal-walkaround";
 
   function toggleWalkaroundSound() {
     const next = !walkaroundSoundOn;
-    window.dispatchEvent(new Event(next ? "unlock-walkaround-sound" : "mute-walkaround-sound"));
+    window.dispatchEvent(new Event(next ? `unlock-${activeSoundChannel}-sound` : `mute-${activeSoundChannel}-sound`));
     setWalkaroundSoundOn(next);
   }
 
@@ -116,7 +116,8 @@ export default function Showroom({ car }) {
     setActiveLabel(clip.label);
 
     if (clip.label !== "Walkaround") {
-      window.dispatchEvent(new Event("mute-walkaround-sound"));
+      window.dispatchEvent(new Event("mute-normal-walkaround-sound"));
+      window.dispatchEvent(new Event("mute-cinema-walkaround-sound"));
       setWalkaroundSoundOn(false);
     }
 
@@ -146,12 +147,12 @@ export default function Showroom({ car }) {
           className="normal-video"
           muted={true}
           enableSoundUnlock={isWalkaround}
-          soundChannel="walkaround"
+          soundChannel="normal-walkaround"
         />
 
         {isWalkaround && (
           <button type="button" className="video-sound-btn" onClick={toggleWalkaroundSound}>
-            {walkaroundSoundOn ? "🔊" : "🔇"}
+            {walkaroundSoundOn ? "ðŸ”Š" : "ðŸ”‡"}
           </button>
         )}
 
@@ -175,12 +176,12 @@ export default function Showroom({ car }) {
           className="cinema-video"
           muted={true}
           enableSoundUnlock={isWalkaround}
-          soundChannel="walkaround"
+          soundChannel="cinema-walkaround"
         />
 
         {isWalkaround && (
           <button type="button" className="video-sound-btn cinema-sound-btn" onClick={toggleWalkaroundSound}>
-            {walkaroundSoundOn ? "🔊" : "🔇"}
+            {walkaroundSoundOn ? "ðŸ”Š" : "ðŸ”‡"}
           </button>
         )}
 

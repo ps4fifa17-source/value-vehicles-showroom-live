@@ -872,4 +872,68 @@ video::-webkit-media-controls{display:none!important}
     margin-bottom:7px !important;
   }
 }
+@media(max-width:920px){
+  .stock-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:12px !important;
+    align-items:start !important;
+  }
+
+  .portrait-card{
+    border-radius:22px !important;
+    min-height:0 !important;
+  }
+
+  .portrait-info{
+    padding:12px !important;
+  }
+
+  .portrait-info span{
+    font-size:10px !important;
+    padding:6px 9px !important;
+  }
+
+  .portrait-info h3{
+    font-size:24px !important;
+    line-height:.9 !important;
+    letter-spacing:-.05em !important;
+    margin:8px 0 !important;
+    max-width:100% !important;
+  }
+
+  .portrait-info strong{
+    font-size:16px !important;
+  }
+
+  .portrait-info div{
+    font-size:15px !important;
+    margin-top:14px !important;
+  }
+
+  .showroom.cinema .cinema-section{
+    padding-top:92px !important;
+  }
+
+  .cinema-fade{
+    height:0 !important;
+  }
+
+  .cinema-inspect-panel{
+    padding-top:10px !important;
+  }
+
+  .tile-content{
+    padding:11px !important;
+  }
+
+  .tile-content strong{
+    font-size:15px !important;
+    line-height:1.05 !important;
+  }
+
+  .tile-content small{
+    font-size:11px !important;
+  }
+}
+
 }

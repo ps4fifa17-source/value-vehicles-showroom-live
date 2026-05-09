@@ -36,10 +36,6 @@ export default function PremiumVideo({
         hlsRef.current = null;
       }
 
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
-
       if (videoSrc.includes(".m3u8")) {
         if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = videoSrc;
@@ -85,7 +81,7 @@ export default function PremiumVideo({
       window.removeEventListener(`unlock-${soundChannel}-sound`, unlockSound);
       window.removeEventListener(`mute-${soundChannel}-sound`, muteSound);
     };
-  }, [src, enableSoundUnlock, soundChannel]);
+  }, [src, soundChannel, enableSoundUnlock, muted]);
 
   useEffect(() => {
     return () => {
