@@ -803,4 +803,41 @@ video::-webkit-media-controls{display:none!important}
   .inspect-tile{
     flex-basis:150px;
   }
+  @media(max-width:920px){
+  .stock-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:12px !important;
+  }
+
+  .portrait-card{
+    border-radius:22px !important;
+  }
+
+  .portrait-info{
+    padding:14px !important;
+  }
+
+  .portrait-info h3{
+    font-size:26px !important;
+  }
+
+  .portrait-info strong{
+    font-size:17px !important;
+  }
+
+  .sound-toggle{
+    position:absolute !important;
+    right:16px !important;
+    bottom:16px !important;
+    z-index:50 !important;
+  }
+
+  .normal-copy h1{
+    font-size:56px !important;
+  }
+
+  .cinema-inspect-panel{
+    padding-top:8px !important;
+  }
+}
 }

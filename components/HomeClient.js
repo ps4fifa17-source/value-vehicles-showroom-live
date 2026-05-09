@@ -11,89 +11,48 @@ export default function HomeClient({ dealership, cars, heroVideo }) {
 
   useEffect(() => {
     function handleScroll() {
-      const triggerPoint = window.innerWidth <= 920 ? 80 : 35;
-setScrolled(window.scrollY > triggerPoint);
+      const triggerPoint = window.innerWidth <= 920 ? 3 : 35;
+      setScrolled(window.scrollY > triggerPoint);
     }
 
     handleScroll();
-    window.addEventListener("scroll", handleScroll);
-
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  function enableSound() {
-    setSoundOn(true);
+  function toggleSound() {
+    const next = !soundOn;
+    window.dispatchEvent(new Event(next ? "unlock-home-sound" : "mute-home-sound"));
+    setSoundOn(next);
   }
 
   return (
     <>
       <Header dealership={dealership} />
-      <div style={{
-  position: "fixed",
-  top: 80,
-  left: 10,
-  zIndex: 999999,
-  background: "lime",
-  color: "black",
-  padding: "10px",
-  fontWeight: "900"
-}}>
-  LIVE TEST 123
-</div>
 
-      <main
-        style={{
-          "--accent": dealership.accent_color || "#732b97",
-          "--accent2": "#b85cff",
-        }}
-      >
-        <section
-          className={`home-hero intro-hero ${
-            scrolled ? "intro-scrolled" : ""
-          }`}
-        >
+      <main style={{ "--accent": dealership.accent_color || "#732b97", "--accent2": "#b85cff" }}>
+        <section className={`home-hero intro-hero ${scrolled ? "intro-scrolled" : ""}`}>
           {heroVideo && (
             <PremiumVideo
-  src={heroVideo}
-  className="home-video"
-  muted={true}
-  enableSoundUnlock={true}
-/>
+              src={heroVideo}
+              className="home-video"
+              muted={true}
+              enableSoundUnlock={true}
+              soundChannel="home"
+            />
           )}
 
           {heroVideo && (
-  <button
-    type="button"
-    className="sound-toggle"
-    onClick={() => {
-      const next = !soundOn;
-
-      if (next) {
-        window.dispatchEvent(new Event("unlock-showroom-sound"));
-      } else {
-        window.dispatchEvent(new Event("mute-showroom-sound"));
-      }
-
-      setSoundOn(next);
-    }}
-  >
-    {soundOn ? "🔊" : "🔇"}
-  </button>
-)}
+            <button type="button" className="sound-toggle" onClick={toggleSound}>
+              {soundOn ? "🔊" : "🔇"}
+            </button>
+          )}
 
           <div className="home-fade" />
 
           <div className="home-copy">
-            <h1>
-              {dealership.homepage_video_title ||
-                "Welcome to our online showroom"}
-            </h1>
-
-            <p>
-              {dealership.homepage_video_subtitle ||
-                "Step inside the car before you visit."}
-            </p>
-
+            <h1>{dealership.homepage_video_title || "Welcome to our online showroom"}</h1>
+            <p>{dealership.homepage_video_subtitle || "Step inside the car before you visit."}</p>
             <a href="#stock">View stock</a>
           </div>
         </section>
@@ -107,10 +66,7 @@ setScrolled(window.scrollY > triggerPoint);
           {cars.length === 0 ? (
             <div className="stock-empty">
               <h3>No video stock live yet</h3>
-              <p>
-                Vehicles will appear here once they are published from the admin
-                portal.
-              </p>
+              <p>Vehicles will appear here once they are published from the admin portal.</p>
             </div>
           ) : (
             <div className="stock-grid">

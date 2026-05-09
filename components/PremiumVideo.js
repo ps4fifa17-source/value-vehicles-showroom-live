@@ -16,56 +16,82 @@ export default function PremiumVideo({
   className = "",
   muted = true,
   enableSoundUnlock = false,
+  soundChannel = "default",
 }) {
   const videoRef = useRef(null);
+  const hlsRef = useRef(null);
+  const loadedSrcRef = useRef("");
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
 
-    let hls;
     const videoSrc = isUrl(src) ? src : cloudflareHls(src);
-
-    if (videoSrc.includes(".m3u8")) {
-      if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = videoSrc;
-      } else if (Hls.isSupported()) {
-        hls = new Hls();
-        hls.loadSource(videoSrc);
-        hls.attachMedia(video);
-      }
-    } else {
-      video.src = videoSrc;
-    }
 
     video.muted = muted;
     video.volume = 1;
+
+    if (loadedSrcRef.current !== videoSrc) {
+      loadedSrcRef.current = videoSrc;
+
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+
+      if (videoSrc.includes(".m3u8")) {
+        if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = videoSrc;
+        } else if (Hls.isSupported()) {
+          const hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: false,
+            maxBufferLength: 8,
+            backBufferLength: 20,
+            startLevel: -1,
+          });
+
+          hlsRef.current = hls;
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
+        }
+      } else {
+        video.src = videoSrc;
+      }
+    }
+
     video.play().catch(() => {});
 
     function unlockSound() {
       if (!enableSoundUnlock) return;
-
       video.muted = false;
       video.volume = 1;
       video.play().catch(() => {});
     }
 
-    window.addEventListener("unlock-showroom-sound", unlockSound);
     function muteSound() {
-  if (!enableSoundUnlock) return;
+      if (!enableSoundUnlock) return;
+      video.muted = true;
+      video.play().catch(() => {});
+    }
 
-  video.muted = true;
-}
-
-window.addEventListener("mute-showroom-sound", muteSound);
+    window.addEventListener(`unlock-${soundChannel}-sound`, unlockSound);
+    window.addEventListener(`mute-${soundChannel}-sound`, muteSound);
 
     return () => {
-  window.removeEventListener("unlock-showroom-sound", unlockSound);
-  window.removeEventListener("mute-showroom-sound", muteSound);
+      window.removeEventListener(`unlock-${soundChannel}-sound`, unlockSound);
+      window.removeEventListener(`mute-${soundChannel}-sound`, muteSound);
+    };
+  }, [src, muted, enableSoundUnlock, soundChannel]);
 
-  if (hls) hls.destroy();
-};
-  }, [src, muted, enableSoundUnlock]);
+  useEffect(() => {
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className={`video-box ready ${className}`}>
@@ -75,7 +101,7 @@ window.addEventListener("mute-showroom-sound", muteSound);
         muted={muted}
         loop
         playsInline
-        preload="auto"
+        preload="metadata"
         controls={false}
       />
     </div>

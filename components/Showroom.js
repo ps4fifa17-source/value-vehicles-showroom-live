@@ -1,15 +1,7 @@
  "use client";
 
-import {
-  Search,
-  MessageCircle,
-  Phone,
-  Info,
-  Send,
-  PhoneCall,
-  Maximize2,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Search, MessageCircle, Phone, Info, Send, PhoneCall, Maximize2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PremiumVideo from "./PremiumVideo";
 import InspectSelector from "./InspectSelector";
 
@@ -55,13 +47,9 @@ function Ask({ car, question, setQuestion, innerRef }) {
       />
 
       <div className="cta-grid">
-        <a
-          className="btn btn-accent"
-          href={`https://wa.me/${whatsAppNumber}?text=${message}`}
-        >
+        <a className="btn btn-accent" href={`https://wa.me/${whatsAppNumber}?text=${message}`}>
           <MessageCircle size={15} /> WhatsApp
         </a>
-
         <a className="btn btn-white" href={`tel:${cleanPhone}`}>
           <Phone size={15} /> Call
         </a>
@@ -82,19 +70,32 @@ export default function Showroom({ car }) {
   const detailsRef = useRef(null);
   const askRef = useRef(null);
 
-  const uniqueInspects = (car.inspectVideos || []).filter(
-  (clip) => clip.label !== "Walkaround"
-);
+  const clips = useMemo(() => {
+    const seen = new Set();
 
-const clips = [
-  {
-    label: "Walkaround",
-    icon: "car",
-    video: car.walkaroundVideo,
-    preview: car.walkaroundVideo,
-  },
-  ...uniqueInspects,
-];
+    const inspects = (car.inspectVideos || []).filter((clip) => {
+      const label = (clip.label || "").trim().toLowerCase();
+      const video = clip.video || "";
+
+      if (!video) return false;
+      if (label === "walkaround") return false;
+      if (video === car.walkaroundVideo) return false;
+      if (seen.has(video)) return false;
+
+      seen.add(video);
+      return true;
+    });
+
+    return [
+      {
+        label: "Walkaround",
+        icon: "car",
+        video: car.walkaroundVideo,
+        preview: car.walkaroundVideo,
+      },
+      ...inspects,
+    ].filter((clip) => clip.video);
+  }, [car.inspectVideos, car.walkaroundVideo]);
 
   useEffect(() => {
     setCurrentVideo(car.walkaroundVideo);
@@ -104,34 +105,32 @@ const clips = [
 
   const isWalkaround = activeLabel === "Walkaround";
 
+  function toggleWalkaroundSound() {
+    const next = !walkaroundSoundOn;
+    window.dispatchEvent(new Event(next ? "unlock-walkaround-sound" : "mute-walkaround-sound"));
+    setWalkaroundSoundOn(next);
+  }
+
   function selectClip(clip) {
     setCurrentVideo(clip.video);
     setActiveLabel(clip.label);
 
     if (clip.label !== "Walkaround") {
+      window.dispatchEvent(new Event("mute-walkaround-sound"));
       setWalkaroundSoundOn(false);
     }
 
-    setTimeout(
-      () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      40
-    );
+    setTimeout(() => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
   }
 
   function scrollTo(ref) {
     setCinema(false);
-    setTimeout(
-      () => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      50
-    );
+    setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
 
   function goInspect() {
     setCinema(true);
-    setTimeout(
-      () => inspectRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      80
-    );
+    setTimeout(() => inspectRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
   }
 
   const cleanPhone = dealership.phone.replaceAll(" ", "");
@@ -145,16 +144,13 @@ const clips = [
         <PremiumVideo
           src={currentVideo}
           className="normal-video"
-          muted={!isWalkaround || !walkaroundSoundOn}
+          muted={true}
           enableSoundUnlock={isWalkaround}
+          soundChannel="walkaround"
         />
 
         {isWalkaround && (
-          <button
-            type="button"
-            className="video-sound-btn"
-            onClick={() => setWalkaroundSoundOn((prev) => !prev)}
-          >
+          <button type="button" className="video-sound-btn" onClick={toggleWalkaroundSound}>
             {walkaroundSoundOn ? "🔊" : "🔇"}
           </button>
         )}
@@ -163,7 +159,6 @@ const clips = [
 
         <div className="normal-copy">
           <h1>{car.title}</h1>
-
           <div className="keybar">
             <span>{car.price}</span>
             <span>{car.mileage}</span>
@@ -178,16 +173,13 @@ const clips = [
         <PremiumVideo
           src={currentVideo}
           className="cinema-video"
-          muted={!isWalkaround || !walkaroundSoundOn}
+          muted={true}
           enableSoundUnlock={isWalkaround}
+          soundChannel="walkaround"
         />
 
         {isWalkaround && (
-          <button
-            type="button"
-            className="video-sound-btn cinema-sound-btn"
-            onClick={() => setWalkaroundSoundOn((prev) => !prev)}
-          >
+          <button type="button" className="video-sound-btn cinema-sound-btn" onClick={toggleWalkaroundSound}>
             {walkaroundSoundOn ? "🔊" : "🔇"}
           </button>
         )}
@@ -197,11 +189,7 @@ const clips = [
         <div className="cinema-inspect-panel">
           <h2>Inspect Vehicle</h2>
           <p>Choose a section and the video above switches straight to it.</p>
-          <InspectSelector
-            car={{ ...car, inspectVideos: clips }}
-            activeLabel={activeLabel}
-            onSelect={selectClip}
-          />
+          <InspectSelector car={{ ...car, inspectVideos: clips }} activeLabel={activeLabel} onSelect={selectClip} />
         </div>
       </section>
 
@@ -209,41 +197,22 @@ const clips = [
         <div className="panel">
           <h2>Inspect Vehicle</h2>
           <p>Choose a section and the video switches straight to it.</p>
-          <InspectSelector
-            car={{ ...car, inspectVideos: clips }}
-            activeLabel={activeLabel}
-            onSelect={selectClip}
-            compact
-          />
+          <InspectSelector car={{ ...car, inspectVideos: clips }} activeLabel={activeLabel} onSelect={selectClip} compact />
         </div>
 
         <Details car={car} innerRef={detailsRef} />
-        <Ask
-          car={car}
-          question={question}
-          setQuestion={setQuestion}
-          innerRef={askRef}
-        />
+        <Ask car={car} question={question} setQuestion={setQuestion} innerRef={askRef} />
       </aside>
 
       <section className="mobile-content">
         <div className="panel mobile-inspect" ref={inspectRef}>
           <h2>Inspect Vehicle</h2>
           <p>Choose a section and the video above switches straight to it.</p>
-          <InspectSelector
-            car={{ ...car, inspectVideos: clips }}
-            activeLabel={activeLabel}
-            onSelect={selectClip}
-          />
+          <InspectSelector car={{ ...car, inspectVideos: clips }} activeLabel={activeLabel} onSelect={selectClip} />
         </div>
 
         <Details car={car} innerRef={detailsRef} />
-        <Ask
-          car={car}
-          question={question}
-          setQuestion={setQuestion}
-          innerRef={askRef}
-        />
+        <Ask car={car} question={question} setQuestion={setQuestion} innerRef={askRef} />
       </section>
 
       <nav className="mobile-dock">
