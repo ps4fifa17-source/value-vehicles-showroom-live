@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function CarPage({ params }) {
+  const { slug } = await params;
   const { data: dealerData } = await supabase
     .from("dealers")
     .select("*")
@@ -16,7 +17,7 @@ export default async function CarPage({ params }) {
   const { data: vehicleData } = await supabase
     .from("vehicles")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .eq("published", true)
     .limit(1);
 
