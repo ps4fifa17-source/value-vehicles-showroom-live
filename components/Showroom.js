@@ -1,6 +1,14 @@
  "use client";
 
-import { Search, MessageCircle, Phone, Info, Send, PhoneCall, Maximize2 } from "lucide-react";
+import {
+  Search,
+  MessageCircle,
+  Phone,
+  Info,
+  Send,
+  PhoneCall,
+  Maximize2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import PremiumVideo from "./PremiumVideo";
 import InspectSelector from "./InspectSelector";
@@ -47,7 +55,10 @@ function Ask({ car, question, setQuestion, innerRef }) {
       />
 
       <div className="cta-grid">
-        <a className="btn btn-accent" href={`https://wa.me/${whatsAppNumber}?text=${message}`}>
+        <a
+          className="btn btn-accent"
+          href={`https://wa.me/${whatsAppNumber}?text=${message}`}
+        >
           <MessageCircle size={15} /> WhatsApp
         </a>
 
@@ -64,6 +75,7 @@ export default function Showroom({ car }) {
   const [question, setQuestion] = useState("");
   const [currentVideo, setCurrentVideo] = useState(car.walkaroundVideo);
   const [activeLabel, setActiveLabel] = useState("Walkaround");
+  const [walkaroundSoundOn, setWalkaroundSoundOn] = useState(false);
 
   const topRef = useRef(null);
   const inspectRef = useRef(null);
@@ -71,34 +83,56 @@ export default function Showroom({ car }) {
   const askRef = useRef(null);
 
   const clips = [
-  {
-    label: "Walkaround",
-    icon: "car",
-    video: car.walkaroundVideo,
-    preview: car.walkaroundVideo,
-  },
-  ...(car.inspectVideos || []).filter(
-    (clip) =>
-      clip.video &&
-      clip.video !== car.walkaroundVideo &&
-      clip.label !== "Walkaround"
-  ),
-];
+    {
+      label: "Walkaround",
+      icon: "car",
+      video: car.walkaroundVideo,
+      preview: car.walkaroundVideo,
+    },
+    ...(car.inspectVideos || []).filter(
+      (clip) =>
+        clip.video &&
+        clip.video !== car.walkaroundVideo &&
+        clip.label !== "Walkaround"
+    ),
+  ];
 
   useEffect(() => {
     setCurrentVideo(car.walkaroundVideo);
     setActiveLabel("Walkaround");
+    setWalkaroundSoundOn(false);
   }, [car.walkaroundVideo]);
+
+  const isWalkaround = activeLabel === "Walkaround";
 
   function selectClip(clip) {
     setCurrentVideo(clip.video);
     setActiveLabel(clip.label);
-    setTimeout(() => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
+
+    if (clip.label !== "Walkaround") {
+      setWalkaroundSoundOn(false);
+    }
+
+    setTimeout(
+      () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      40
+    );
   }
 
   function scrollTo(ref) {
     setCinema(false);
-    setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(
+      () => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50
+    );
+  }
+
+  function goInspect() {
+    setCinema(true);
+    setTimeout(
+      () => inspectRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      80
+    );
   }
 
   const cleanPhone = dealership.phone.replaceAll(" ", "");
@@ -109,7 +143,23 @@ export default function Showroom({ car }) {
       style={{ "--accent": dealership.accent, "--accent2": dealership.accent2 }}
     >
       <section className="mobile-normal-hero" ref={topRef}>
-        <PremiumVideo src={currentVideo} className="normal-video" />
+        <PremiumVideo
+          src={currentVideo}
+          className="normal-video"
+          muted={!isWalkaround || !walkaroundSoundOn}
+          enableSoundUnlock={isWalkaround}
+        />
+
+        {isWalkaround && (
+          <button
+            type="button"
+            className="video-sound-btn"
+            onClick={() => setWalkaroundSoundOn((prev) => !prev)}
+          >
+            {walkaroundSoundOn ? "🔊" : "🔇"}
+          </button>
+        )}
+
         <div className="normal-fade" />
 
         <div className="normal-copy">
@@ -125,11 +175,27 @@ export default function Showroom({ car }) {
         </div>
       </section>
 
-      <section className="cinema-section">
-        <PremiumVideo src={currentVideo} className="cinema-video" />
+      <section className="cinema-section" ref={inspectRef}>
+        <PremiumVideo
+          src={currentVideo}
+          className="cinema-video"
+          muted={!isWalkaround || !walkaroundSoundOn}
+          enableSoundUnlock={isWalkaround}
+        />
+
+        {isWalkaround && (
+          <button
+            type="button"
+            className="video-sound-btn cinema-sound-btn"
+            onClick={() => setWalkaroundSoundOn((prev) => !prev)}
+          >
+            {walkaroundSoundOn ? "🔊" : "🔇"}
+          </button>
+        )}
+
         <div className="cinema-fade" />
 
-        <div className="cinema-inspect-panel" ref={inspectRef}>
+        <div className="cinema-inspect-panel">
           <h2>Inspect Vehicle</h2>
           <p>Choose a section and the video above switches straight to it.</p>
           <InspectSelector
@@ -153,12 +219,32 @@ export default function Showroom({ car }) {
         </div>
 
         <Details car={car} innerRef={detailsRef} />
-        <Ask car={car} question={question} setQuestion={setQuestion} innerRef={askRef} />
+        <Ask
+          car={car}
+          question={question}
+          setQuestion={setQuestion}
+          innerRef={askRef}
+        />
       </aside>
 
       <section className="mobile-content">
+        <div className="panel mobile-inspect" ref={inspectRef}>
+          <h2>Inspect Vehicle</h2>
+          <p>Choose a section and the video above switches straight to it.</p>
+          <InspectSelector
+            car={{ ...car, inspectVideos: clips }}
+            activeLabel={activeLabel}
+            onSelect={selectClip}
+          />
+        </div>
+
         <Details car={car} innerRef={detailsRef} />
-        <Ask car={car} question={question} setQuestion={setQuestion} innerRef={askRef} />
+        <Ask
+          car={car}
+          question={question}
+          setQuestion={setQuestion}
+          innerRef={askRef}
+        />
       </section>
 
       <nav className="mobile-dock">
@@ -167,7 +253,7 @@ export default function Showroom({ car }) {
           <span>{cinema ? "Normal" : "Cinema"}</span>
         </button>
 
-        <button type="button" onClick={() => scrollTo(inspectRef)}>
+        <button type="button" onClick={goInspect}>
           <Search size={17} />
           <span>Inspect</span>
         </button>
