@@ -1,0 +1,1 @@
+Add logo as public/images/value-logo.png then set logo: "/images/value-logo.png" in data/cars.js
