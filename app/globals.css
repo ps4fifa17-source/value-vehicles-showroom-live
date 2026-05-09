@@ -840,4 +840,36 @@ video::-webkit-media-controls{display:none!important}
     padding-top:8px !important;
   }
 }
+@media(max-width:920px){
+  .showroom.cinema .cinema-section{
+    padding-top:92px !important;
+  }
+
+  .cinema-fade{
+    height:8px !important;
+  }
+
+  .cinema-inspect-panel{
+    padding-top:8px !important;
+  }
+
+  .tile-content{
+    padding:11px !important;
+  }
+
+  .tile-content strong{
+    font-size:15px !important;
+    line-height:1.05 !important;
+  }
+
+  .tile-content small{
+    font-size:11px !important;
+  }
+
+  .tile-content span{
+    width:30px !important;
+    height:30px !important;
+    margin-bottom:7px !important;
+  }
+}
 }

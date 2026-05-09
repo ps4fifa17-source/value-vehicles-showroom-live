@@ -28,9 +28,6 @@ export default function PremiumVideo({
 
     const videoSrc = isUrl(src) ? src : cloudflareHls(src);
 
-    video.muted = muted;
-    video.volume = 1;
-
     if (loadedSrcRef.current !== videoSrc) {
       loadedSrcRef.current = videoSrc;
 
@@ -39,6 +36,10 @@ export default function PremiumVideo({
         hlsRef.current = null;
       }
 
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+
       if (videoSrc.includes(".m3u8")) {
         if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = videoSrc;
@@ -46,7 +47,7 @@ export default function PremiumVideo({
           const hls = new Hls({
             enableWorker: true,
             lowLatencyMode: false,
-            maxBufferLength: 8,
+            maxBufferLength: 12,
             backBufferLength: 20,
             startLevel: -1,
           });
@@ -60,6 +61,8 @@ export default function PremiumVideo({
       }
     }
 
+    video.muted = muted;
+    video.volume = 1;
     video.play().catch(() => {});
 
     function unlockSound() {
@@ -82,7 +85,7 @@ export default function PremiumVideo({
       window.removeEventListener(`unlock-${soundChannel}-sound`, unlockSound);
       window.removeEventListener(`mute-${soundChannel}-sound`, muteSound);
     };
-  }, [src, muted, enableSoundUnlock, soundChannel]);
+  }, [src, enableSoundUnlock, soundChannel]);
 
   useEffect(() => {
     return () => {
