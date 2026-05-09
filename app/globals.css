@@ -331,4 +331,7 @@ video::-webkit-media-controls{display:none!important}
     font-size:18px !important;
   }
 }
+body{
+  outline:12px solid lime !important;
+}
 }
