@@ -6,6 +6,13 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function CarPage({ params }) {
+  const { data: dealerData } = await supabase
+    .from("dealers")
+    .select("*")
+    .limit(1);
+
+  const dealership = dealerData?.[0] || {};
+
   const { data: vehicleData } = await supabase
     .from("vehicles")
     .select("*")
@@ -15,7 +22,9 @@ export default async function CarPage({ params }) {
 
   const vehicle = vehicleData?.[0];
 
-  if (!vehicle) notFound();
+  if (!vehicle) {
+    notFound();
+  }
 
   const { data: clipsData } = await supabase
     .from("vehicle_inspect_clips")
@@ -33,14 +42,17 @@ export default async function CarPage({ params }) {
     gearbox: vehicle.gearbox,
     body: vehicle.body,
     status: "Available",
+
     teaserVideo: vehicle.teaser_video,
     walkaroundVideo: vehicle.walkaround_video,
+
     details: [
       ["Mileage", vehicle.mileage],
       ["Fuel", vehicle.fuel],
       ["Gearbox", vehicle.gearbox],
       ["Body", vehicle.body],
     ],
+
     inspectVideos:
       clipsData
         ?.filter((clip) => clip.cloudflare_video_id)
@@ -48,7 +60,9 @@ export default async function CarPage({ params }) {
           label: clip.label,
           icon: clip.icon,
           video: clip.cloudflare_video_id,
-          preview: clip.cloudflare_preview_id || clip.cloudflare_video_id,
+          preview:
+            clip.cloudflare_preview_id ||
+            clip.cloudflare_video_id,
         })) || [],
   };
 
