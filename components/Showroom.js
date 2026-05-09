@@ -152,7 +152,9 @@ export default function Showroom({ car }) {
 
         {isWalkaround && (
           <button type="button" className="video-sound-btn" onClick={toggleWalkaroundSound}>
-            {walkaroundSoundOn ? "ðŸ”Š" : "ðŸ”‡"}
+            <span className="sound-icon">
+  {walkaroundSoundOn ? "🔊" : "🔇"}
+</span>
           </button>
         )}
 

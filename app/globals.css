@@ -982,26 +982,38 @@ video::-webkit-media-controls{display:none!important}
   opacity:.92;
 }
 button.video-sound-btn{
+  width:48px!important;
+  height:48px!important;
+  border-radius:16px!important;
   font-size:0!important;
 }
 
-button.video-sound-btn::before{
-  content:"🔇";
-  font-size:26px!important;
+button.video-sound-btn .sound-icon{
+  font-size:22px!important;
   line-height:1!important;
 }
 
+button.video-sound-btn::before{
+  content:none!important;
+}
+
+.portrait-card .portrait-info{
+  padding:16px!important;
+}
+
 .portrait-card .portrait-info h3{
-  font-size:26px!important;
-  line-height:.9!important;
-  max-width:78%!important;
+  font-size:23px!important;
+  line-height:.88!important;
+  max-width:72%!important;
+  margin:6px 0 8px!important;
 }
 
 .portrait-card .portrait-info strong{
-  font-size:16px!important;
+  font-size:15px!important;
+  margin-bottom:10px!important;
 }
 
 .portrait-card .portrait-info div{
-  font-size:13px!important;
+  font-size:12px!important;
 }
 }
