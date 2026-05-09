@@ -82,20 +82,19 @@ export default function Showroom({ car }) {
   const detailsRef = useRef(null);
   const askRef = useRef(null);
 
-  const clips = [
-    {
-      label: "Walkaround",
-      icon: "car",
-      video: car.walkaroundVideo,
-      preview: car.walkaroundVideo,
-    },
-    ...(car.inspectVideos || []).filter(
-      (clip) =>
-        clip.video &&
-        clip.video !== car.walkaroundVideo &&
-        clip.label !== "Walkaround"
-    ),
-  ];
+  const uniqueInspects = (car.inspectVideos || []).filter(
+  (clip) => clip.label !== "Walkaround"
+);
+
+const clips = [
+  {
+    label: "Walkaround",
+    icon: "car",
+    video: car.walkaroundVideo,
+    preview: car.walkaroundVideo,
+  },
+  ...uniqueInspects,
+];
 
   useEffect(() => {
     setCurrentVideo(car.walkaroundVideo);
