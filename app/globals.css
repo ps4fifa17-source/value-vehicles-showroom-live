@@ -942,14 +942,15 @@ video::-webkit-media-controls{display:none!important}
   width:58px;
   height:58px;
   border-radius:20px;
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.10);
   background:rgba(8,8,12,.72);
   backdrop-filter:blur(20px);
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:40;
-  font-size:22px;
+  font-size:26px;
+  line-height:1;
   color:white;
   box-shadow:0 10px 35px rgba(0,0,0,.35);
 }
@@ -959,25 +960,25 @@ video::-webkit-media-controls{display:none!important}
 }
 
 .portrait-info{
-  padding:20px!important;
+  padding:18px!important;
 }
 
 .portrait-info h3{
-  font-size:38px!important;
-  line-height:.88!important;
-  letter-spacing:-.06em!important;
-  margin:10px 0 10px!important;
-  max-width:90%;
+  font-size:30px!important;
+  line-height:.92!important;
+  letter-spacing:-.05em!important;
+  margin:8px 0 8px!important;
+  max-width:82%;
 }
 
 .portrait-info strong{
-  font-size:20px!important;
+  font-size:17px!important;
   display:block;
-  margin-bottom:16px!important;
+  margin-bottom:12px!important;
 }
 
 .portrait-info div{
-  font-size:15px!important;
-  opacity:.95;
+  font-size:14px!important;
+  opacity:.92;
 }
 }
