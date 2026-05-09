@@ -981,4 +981,27 @@ video::-webkit-media-controls{display:none!important}
   font-size:14px!important;
   opacity:.92;
 }
+button.video-sound-btn{
+  font-size:0!important;
+}
+
+button.video-sound-btn::before{
+  content:"🔇";
+  font-size:26px!important;
+  line-height:1!important;
+}
+
+.portrait-card .portrait-info h3{
+  font-size:26px!important;
+  line-height:.9!important;
+  max-width:78%!important;
+}
+
+.portrait-card .portrait-info strong{
+  font-size:16px!important;
+}
+
+.portrait-card .portrait-info div{
+  font-size:13px!important;
+}
 }
