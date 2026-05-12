@@ -26,7 +26,7 @@ function Details({ car, innerRef }) {
   );
 }
 
-function Ask({ car, question, setQuestion, innerRef }) {
+function Ask({ car, question, setQuestion, innerRef, onInterest, onCall }) {
   const cleanPhone = dealership.phone.replaceAll(" ", "");
   const whatsAppNumber = "44" + dealership.whatsapp.replace(/^0/, "");
   const message = encodeURIComponent(
@@ -46,15 +46,45 @@ function Ask({ car, question, setQuestion, innerRef }) {
       />
 
       <div className="cta-grid">
-        <a className="btn btn-accent" href={`https://wa.me/${whatsAppNumber}?text=${message}`}>
+        <a className="btn btn-accent" href={`https://wa.me/${whatsAppNumber}?text=${message}`} onClick={onInterest}>
           <MessageCircle size={15} /> WhatsApp
         </a>
-        <a className="btn btn-white" href={`tel:${cleanPhone}`}>
+        <a className="btn btn-white" href={`tel:${cleanPhone}`} onClick={onCall}>
           <Phone size={15} /> Call
         </a>
       </div>
     </section>
   );
+}
+
+function getSessionId() {
+  if (typeof window === "undefined") return "";
+
+  let id = localStorage.getItem("showroom_session_id");
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("showroom_session_id", id);
+  }
+
+  return id;
+}
+
+function trackEvent(car, event_type, metadata = {}) {
+  fetch("/api/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      vehicle_id: car.id || null,
+      vehicle_slug: car.slug || null,
+      vehicle_title: car.title || null,
+      event_type,
+      metadata: {
+        ...metadata,
+        session_id: getSessionId(),
+      },
+    }),
+  }).catch(() => {});
 }
 
 export default function Showroom({ car }) {
@@ -68,6 +98,10 @@ export default function Showroom({ car }) {
   const inspectRef = useRef(null);
   const detailsRef = useRef(null);
   const askRef = useRef(null);
+
+  useEffect(() => {
+  trackEvent(car, "vehicle_view");
+}, [car.id]);
 
   const clips = useMemo(() => {
     const seen = new Set();
@@ -106,23 +140,42 @@ export default function Showroom({ car }) {
   const activeSoundChannel = cinema ? "cinema-walkaround" : "normal-walkaround";
 
   function toggleWalkaroundSound() {
-    const next = !walkaroundSoundOn;
-    window.dispatchEvent(new Event(next ? `unlock-${activeSoundChannel}-sound` : `mute-${activeSoundChannel}-sound`));
-    setWalkaroundSoundOn(next);
-  }
+  const next = !walkaroundSoundOn;
+
+  window.dispatchEvent(
+    new Event(
+      next
+        ? `unlock-${activeSoundChannel}-sound`
+        : `mute-${activeSoundChannel}-sound`
+    )
+  );
+
+  setWalkaroundSoundOn(next);
+
+  trackEvent(car, next ? "walkaround_sound_on" : "walkaround_sound_off", {
+    activeLabel,
+  });
+}
 
   function selectClip(clip) {
-    setCurrentVideo(clip.video);
-    setActiveLabel(clip.label);
+  setCurrentVideo(clip.video);
+  setActiveLabel(clip.label);
 
-    if (clip.label !== "Walkaround") {
-      window.dispatchEvent(new Event("mute-normal-walkaround-sound"));
-      window.dispatchEvent(new Event("mute-cinema-walkaround-sound"));
-      setWalkaroundSoundOn(false);
-    }
+  trackEvent(car, "inspect_clip_open", {
+    clip_label: clip.label,
+  });
 
-    setTimeout(() => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
+  if (clip.label !== "Walkaround") {
+    window.dispatchEvent(new Event("mute-normal-walkaround-sound"));
+    window.dispatchEvent(new Event("mute-cinema-walkaround-sound"));
+    setWalkaroundSoundOn(false);
   }
+
+  setTimeout(
+    () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    40
+  );
+}
 
   function scrollTo(ref) {
     setCinema(false);
@@ -206,7 +259,14 @@ export default function Showroom({ car }) {
         </div>
 
         <Details car={car} innerRef={detailsRef} />
-        <Ask car={car} question={question} setQuestion={setQuestion} innerRef={askRef} />
+        <Ask
+  car={car}
+  question={question}
+  setQuestion={setQuestion}
+  innerRef={askRef}
+  onInterest={() => trackEvent(car, "interest_click", { question })}
+  onCall={() => trackEvent(car, "call_click")}
+/>
       </aside>
 
       <section className="mobile-content">
@@ -217,11 +277,25 @@ export default function Showroom({ car }) {
         </div>
 
         <Details car={car} innerRef={detailsRef} />
-        <Ask car={car} question={question} setQuestion={setQuestion} innerRef={askRef} />
+        <Ask
+  car={car}
+  question={question}
+  setQuestion={setQuestion}
+  innerRef={askRef}
+  onInterest={() => trackEvent(car, "interest_click", { question })}
+  onCall={() => trackEvent(car, "call_click")}
+/>
       </section>
 
       <nav className="mobile-dock">
-        <button type="button" onClick={() => setCinema(!cinema)}>
+        <button
+  type="button"
+  onClick={() => {
+    const next = !cinema;
+    setCinema(next);
+    trackEvent(car, next ? "cinema_open" : "cinema_close");
+  }}
+>
           <Maximize2 size={17} />
           <span>{cinema ? "Normal" : "Cinema"}</span>
         </button>
@@ -241,7 +315,7 @@ export default function Showroom({ car }) {
           <span>Ask</span>
         </button>
 
-        <a href={`tel:${cleanPhone}`}>
+        <a href={`tel:${cleanPhone}`} onClick={() => trackEvent(car, "call_click")}>
           <PhoneCall size={17} />
           <span>Call</span>
         </a>
